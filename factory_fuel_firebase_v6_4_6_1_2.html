@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบจัดการน้ำมันโรงงาน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+</head>
+<body style="margin:0;padding:12px 16px;background:#F5F4F0;min-height:100vh">
+<style>
+:root{
+  --font-sans:'Sarabun',sans-serif;
+  --font-serif:Georgia,serif;
+  --font-mono:monospace;
+  --color-background-primary:#FFFFFF;
+  --color-background-secondary:#F1EFE8;
+  --color-background-tertiary:#E8E6DE;
+  --color-background-info:#E6F1FB;
+  --color-background-success:#E1F5EE;
+  --color-background-warning:#FAEEDA;
+  --color-background-danger:#FCEBEB;
+  --color-text-primary:#1A1917;
+  --color-text-secondary:#5F5E5A;
+  --color-text-tertiary:#888780;
+  --color-text-info:#185FA5;
+  --color-text-success:#0F6E56;
+  --color-text-warning:#854F0B;
+  --color-text-danger:#A32D2D;
+  --color-border-tertiary:rgba(26,25,23,0.15);
+  --color-border-secondary:rgba(26,25,23,0.28);
+  --color-border-primary:rgba(26,25,23,0.40);
+  --color-border-info:rgba(24,95,165,0.40);
+  --color-border-success:rgba(15,110,86,0.40);
+  --color-border-warning:rgba(133,79,11,0.40);
+  --color-border-danger:rgba(163,45,45,0.40);
+  --border-radius-md:8px;
+  --border-radius-lg:12px;
+  --border-radius-xl:16px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --color-background-primary:#1C1B19;
+    --color-background-secondary:#28271F;
+    --color-background-tertiary:#333229;
+    --color-text-primary:#F1EFE8;
+    --color-text-secondary:#B4B2A9;
+    --color-text-tertiary:#888780;
+    --color-border-tertiary:rgba(241,239,232,0.15);
+    --color-border-secondary:rgba(241,239,232,0.28);
+    --color-border-primary:rgba(241,239,232,0.40);
+  }
+  body{background:#111110}
+}
+*{box-sizing:border-box;margin:0;padding:0}
+.app{padding:1rem 0;font-family:'Sarabun',sans-serif;max-width:720px;margin:0 auto;background:var(--color-background-tertiary)}
+.tabs{display:flex;gap:4px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{padding:8px 12px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'Sarabun',sans-serif}
+.tab.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);font-weight:500}
+.tab:hover:not(.active){color:var(--color-text-primary)}
+.section{display:none}.section.active{display:block}
+.tanks-visual{display:flex;align-items:flex-end;justify-content:center;gap:28px;margin-bottom:1.5rem;padding:1rem 0}
+.tank-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.125rem;margin-bottom:1rem}
+.card-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:1rem;display:flex;align-items:center;gap:7px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg.full{grid-column:1/-1}
+label{font-size:12px;color:var(--color-text-secondary)}
+input,select{width:100%;padding:7px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:'Sarabun',sans-serif}
+input:focus,select:focus{outline:none;border-color:var(--color-border-primary)}
+.calc-box{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.calc-card{border-radius:var(--border-radius-md);padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.calc-card.dist{background:#E6F1FB}.calc-card.econ{background:#E1F5EE}
+.calc-card .c-lbl{font-size:11px;font-weight:500}
+.calc-card.dist .c-lbl{color:#185FA5}.calc-card.econ .c-lbl{color:#0F6E56}
+.calc-card .c-val{font-size:18px;font-weight:500}
+.calc-card.dist .c-val{color:#0C447C}.calc-card.econ .c-val{color:#085041}
+.calc-card .c-sub{font-size:11px}
+.calc-card.dist .c-sub{color:#378ADD}.calc-card.econ .c-sub{color:#1D9E75}
+.sel-row{display:flex;gap:6px;align-items:center}
+.sel-row select{flex:1}
+.sel-row button{padding:7px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-primary);cursor:pointer;font-size:13px;white-space:nowrap;font-family:'Sarabun',sans-serif}
+.sel-row button:hover{background:var(--color-background-tertiary)}
+.ts-box{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:9px 12px;display:flex;align-items:center;gap:9px}
+.ts-box i{font-size:17px;color:var(--color-text-secondary)}
+.ts-val{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.ts-lbl{font-size:11px;color:var(--color-text-secondary)}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:.875rem}
+.btn{padding:7px 18px;border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:'Sarabun',sans-serif}
+.btn-p{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.btn-warn{background:#FAEEDA;color:#633806;border-color:#EF9F27}
+.btn:hover{opacity:.85}
+.alert{padding:9px 13px;border-radius:var(--border-radius-md);font-size:13px;margin-bottom:.875rem}
+.a-ok{background:#E1F5EE;color:#0F6E56}.a-err{background:#FCEBEB;color:#A32D2D}.a-warn{background:#FAEEDA;color:#633806}
+.filters{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.filters select{width:auto;flex:1;min-width:110px;font-size:13px;padding:6px 9px}
+.log-list{display:flex;flex-direction:column;gap:8px}
+.log-item{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.875rem}
+.log-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;flex-wrap:wrap;gap:4px}
+.badge{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
+.b-drain{background:#FAECE7;color:#993C1D}.b-fill{background:#E1F5EE;color:#0F6E56}.b-adj{background:#FAEEDA;color:#633806}
+.log-body{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;font-size:12px}
+.lf label{color:var(--color-text-secondary);font-size:11px;display:block}
+.lf span{color:var(--color-text-primary);font-weight:500}
+.log-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)}
+.ls-card{border-radius:var(--border-radius-md);padding:7px 10px}
+.ls-card.d{background:#E6F1FB}.ls-card.e{background:#E1F5EE}
+.ls-card .ll{font-size:10px;font-weight:500}.ls-card.d .ll{color:#185FA5}.ls-card.e .ll{color:#0F6E56}
+.ls-card .lv{font-size:14px;font-weight:500}.ls-card.d .lv{color:#0C447C}.ls-card.e .lv{color:#085041}
+.empty{text-align:center;color:var(--color-text-secondary);padding:2rem;font-size:13px}
+.db-list{display:flex;flex-direction:column;gap:6px;margin-top:.5rem}
+.db-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:13px}
+.db-item span{color:var(--color-text-primary)}
+.db-item button{border:none;background:none;cursor:pointer;color:var(--color-text-secondary);font-size:15px;padding:0 4px;line-height:1}
+.db-item button:hover{color:#A32D2D}
+.divider{border:none;border-top:0.5px solid var(--color-border-tertiary);grid-column:1/-1;margin:2px 0}
+.sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;background:#1D9E75}
+.sync-dot.offline{background:#E24B4A}.sync-dot.syncing{background:#EF9F27}
+
+.tank-adj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1rem}
+.tank-adj-card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem}
+.tank-adj-name{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px}
+.tank-adj-curr{font-size:20px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.tank-adj-cap{font-size:11px;color:var(--color-text-secondary);margin-bottom:10px}
+.tank-adj-bar-wrap{background:var(--color-background-primary);border-radius:4px;height:6px;margin-bottom:10px;overflow:hidden}
+.tank-adj-bar{height:100%;border-radius:4px}
+.tank-adj-inp{display:flex;flex-direction:column;gap:4px}
+</style>
+
+<div class="app" style="padding:1rem;background:var(--color-background-tertiary);min-height:100vh">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+    <h2 style="font-size:17px;font-weight:500;color:var(--color-text-primary)"><i class="ti ti-droplet" aria-hidden="true"></i> ระบบจัดการน้ำมันโรงงาน</h2>
+    <span style="font-size:11px;color:var(--color-text-secondary);display:flex;align-items:center;gap:6px"><span class="sync-dot syncing" id="syncDot"></span><span id="syncText">กำลังเชื่อมต่อ...</span><button id="retryBtn" onclick="_retryConnect()" style="display:none;font-size:11px;padding:2px 8px;border:0.5px solid var(--color-border-secondary);border-radius:6px;background:var(--color-background-secondary);color:var(--color-text-primary);cursor:pointer;font-family:'Sarabun',sans-serif">เชื่อมต่อใหม่</button></span>
+  </div>
+  <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:1.25rem">ถัง 1 = 20,000 ล. &nbsp;|&nbsp; ถัง 2 = 20,000 ล. &nbsp;|&nbsp; ถัง 3 = 9,500 ล.</p>
+
+  <div class="tanks-visual" id="tanksVisual"><div style="font-size:13px;color:var(--color-text-secondary);padding:1rem">กำลังโหลด...</div></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('drain')"><i class="ti ti-gas-station" aria-hidden="true"></i> เติมน้ำมัน</button>
+    <button class="tab" onclick="switchTab('fill')"><i class="ti ti-plus" aria-hidden="true"></i> น้ำมันมาลง</button>
+    <button class="tab" onclick="switchTab('log')"><i class="ti ti-clipboard-list" aria-hidden="true"></i> ประวัติ</button>
+    <button class="tab" onclick="switchTab('db')"><i class="ti ti-database" aria-hidden="true"></i> จัดการข้อมูล</button>
+  </div>
+
+  <div id="alertBox"></div>
+
+  <!-- เติมน้ำมัน -->
+  <div id="sec-drain" class="section active">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-gas-station" aria-hidden="true"></i> บันทึกการเติมน้ำมัน</div>
+      <div class="grid2">
+        <div class="fg full"><label>วันที่และเวลาบันทึก (อัตโนมัติ)</label><div class="ts-box"><i class="ti ti-clock" aria-hidden="true"></i><div><div class="ts-lbl">บันทึก ณ เวลา</div><div class="ts-val" id="liveTime">--</div></div></div></div>
+        <div class="fg full"><label><i class="ti ti-gauge" style="font-size:12px" aria-hidden="true"></i> เลขมิเตอร์ที่ถังน้ำมัน (ลิตร)</label><input id="d_meter" type="number" min="0" placeholder="กรอกเลขมิเตอร์ที่อ่านได้จากถัง"></div>
+        <hr class="divider">
+        <div class="fg"><label>เจ้าหน้าที่ผู้เติม</label><select id="d_staff"><option value="">-- เลือกเจ้าหน้าที่ --</option></select></div>
+        <div class="fg"><label>คนขับ</label><select id="d_driver"><option value="">-- เลือกคนขับ --</option></select></div>
+        <div class="fg"><label>ทะเบียนรถ</label><select id="d_plate"><option value="">-- เลือกทะเบียน --</option></select></div>
+        <div class="fg"><label>จ่ายจากถัง</label><select id="d_tank"><option value="1">ถัง 1 (20,000 ล.)</option><option value="2">ถัง 2 (20,000 ล.)</option><option value="3">ถัง 3 (9,500 ล.)</option></select></div>
+        <hr class="divider">
+        <div class="fg"><label><i class="ti ti-road" style="font-size:12px" aria-hidden="true"></i> เลขไมล์เดิม (กม.)</label><input id="d_mile_old" type="number" min="0" placeholder="0" oninput="calcStats()"></div>
+        <div class="fg"><label><i class="ti ti-road" style="font-size:12px" aria-hidden="true"></i> เลขไมล์ใหม่ (กม.)</label><input id="d_mile_new" type="number" min="0" placeholder="0" oninput="calcStats()"></div>
+        <div class="calc-box" id="calcBox" style="display:none">
+          <div class="calc-card dist"><div class="c-lbl"><i class="ti ti-arrows-right-left" style="font-size:11px" aria-hidden="true"></i> ระยะทางที่วิ่ง</div><div class="c-val" id="calcDist">-- กม.</div><div class="c-sub" id="calcDistSub">ไมล์ใหม่ − ไมล์เดิม</div></div>
+          <div class="calc-card econ"><div class="c-lbl"><i class="ti ti-chart-line" style="font-size:11px" aria-hidden="true"></i> อัตราสิ้นเปลือง</div><div class="c-val" id="calcEcon">-- กม./ล.</div><div class="c-sub" id="calcEconSub">ระยะทาง ÷ ปริมาณน้ำมัน</div></div>
+        </div>
+        <hr class="divider">
+        <div class="fg full"><label>ปริมาณที่จ่าย (ลิตร)</label><input id="d_amount" type="number" min="1" placeholder="0" oninput="calcStats()"></div>
+        <div class="fg full"><label>หมายเหตุ</label><input id="d_note" type="text" placeholder="ถ้ามี"></div>
+      </div>
+      <div class="actions"><button class="btn" onclick="clearDrain()">ล้างข้อมูล</button><button class="btn btn-p" onclick="saveDrain()">บันทึกการจ่าย</button></div>
+    </div>
+  </div>
+
+  <!-- น้ำมันมาลง -->
+  <div id="sec-fill" class="section">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-plus" aria-hidden="true"></i> น้ำมันมาลงเข้าถัง</div>
+      <div class="grid2">
+        <div class="fg"><label>วันที่ซื้อ/รับน้ำมัน</label><input id="f_date" type="date"></div>
+        <div class="fg"><label>เวลา</label><input id="f_time" type="time"></div>
+        <div class="fg full"><label><i class="ti ti-gauge" style="font-size:12px" aria-hidden="true"></i> เลขมิเตอร์ที่ถังน้ำมัน (ลิตร)</label><input id="f_meter" type="number" min="0" placeholder="กรอกเลขมิเตอร์ที่อ่านได้จากถัง"></div>
+        <hr class="divider">
+        <div class="fg"><label>ผู้ตรวจสอบ / ผู้รับผิดชอบ</label><select id="f_inspector"><option value="">-- เลือกผู้ตรวจสอบ --</option></select></div>
+        <div class="fg"><label>ผู้จัดส่ง</label><select id="f_supplier"><option value="">-- เลือกผู้จัดส่ง --</option></select></div>
+        <div class="fg"><label>คลังน้ำมันต้นทาง</label><select id="f_depot"><option value="">-- เลือกคลังต้นทาง --</option></select></div>
+        <div class="fg"><label>เติมเข้าถัง</label><select id="f_tank"><option value="1">ถัง 1 (20,000 ล.)</option><option value="2">ถัง 2 (20,000 ล.)</option><option value="3">ถัง 3 (9,500 ล.)</option></select></div>
+        <div class="fg"><label>ปริมาณที่เติม (ลิตร)</label><input id="f_amount" type="number" min="1" placeholder="0"></div>
+        <div class="fg"><label>ราคาต่อลิตร (บาท)</label><input id="f_price" type="number" min="0" step="0.01" placeholder="0.00"></div>
+        <div class="fg full"><label>หมายเหตุ</label><input id="f_note" type="text" placeholder="ถ้ามี"></div>
+      </div>
+      <div class="actions"><button class="btn" onclick="clearFill()">ล้างข้อมูล</button><button class="btn btn-p" onclick="saveFill()">บันทึกการรับน้ำมัน</button></div>
+    </div>
+  </div>
+
+  <!-- ประวัติ -->
+  <div id="sec-log" class="section">
+    <div class="filters">
+      <select id="flt_type" onchange="renderLog()"><option value="">ทุกประเภท</option><option value="drain">เติมน้ำมัน</option><option value="fill">น้ำมันมาลง</option><option value="adjust">ปรับสถานะ</option></select>
+      <select id="flt_tank" onchange="renderLog()"><option value="">ทุกถัง</option><option value="1">ถัง 1</option><option value="2">ถัง 2</option><option value="3">ถัง 3</option></select>
+      <select id="flt_plate" onchange="renderLog()"><option value="">ทุกทะเบียน</option></select>
+    </div>
+    <div id="logList" class="log-list"></div>
+  </div>
+
+  <!-- จัดการข้อมูล -->
+  <div id="sec-db" class="section">
+    <div class="card"><div class="card-title"><i class="ti ti-users" aria-hidden="true"></i> เจ้าหน้าที่ผู้เติม</div><div class="sel-row" style="margin-bottom:.5rem"><input id="new_staff" type="text" placeholder="ชื่อเจ้าหน้าที่ใหม่"><button onclick="addItem('staff','new_staff')">+ เพิ่ม</button></div><div id="staffList" class="db-list"></div></div>
+    <div class="card"><div class="card-title"><i class="ti ti-steering-wheel" aria-hidden="true"></i> คนขับ</div><div class="sel-row" style="margin-bottom:.5rem"><input id="new_driver" type="text" placeholder="ชื่อคนขับใหม่"><button onclick="addItem('drivers','new_driver')">+ เพิ่ม</button></div><div id="driverList" class="db-list"></div></div>
+    <div class="card"><div class="card-title"><i class="ti ti-car" aria-hidden="true"></i> ทะเบียนรถ</div><div class="sel-row" style="margin-bottom:.5rem"><input id="new_plate" type="text" placeholder="เช่น กข-1234"><button onclick="addItem('plates','new_plate')">+ เพิ่ม</button></div><div id="plateList" class="db-list"></div></div>
+    <div class="card"><div class="card-title"><i class="ti ti-user-check" aria-hidden="true"></i> ผู้ตรวจสอบ</div><div class="sel-row" style="margin-bottom:.5rem"><input id="new_inspector" type="text" placeholder="ชื่อผู้ตรวจสอบใหม่"><button onclick="addItem('inspectors','new_inspector')">+ เพิ่ม</button></div><div id="inspectorList" class="db-list"></div></div>
+    <div class="card"><div class="card-title"><i class="ti ti-truck" aria-hidden="true"></i> ผู้จัดส่ง</div><div class="sel-row" style="margin-bottom:.5rem"><input id="new_supplier" type="text" placeholder="ชื่อผู้จัดส่งใหม่"><button onclick="addItem('suppliers','new_supplier')">+ เพิ่ม</button></div><div id="supplierList" class="db-list"></div></div>
+    <div class="card"><div class="card-title"><i class="ti ti-building-warehouse" aria-hidden="true"></i> คลังน้ำมันต้นทาง</div><div class="sel-row" style="margin-bottom:.5rem"><input id="new_depot" type="text" placeholder="ชื่อคลังน้ำมัน"><button onclick="addItem('depots','new_depot')">+ เพิ่ม</button></div><div id="depotList" class="db-list"></div></div>
+  </div>
+</div>
+
+<!-- Firebase Compat SDK (รองรับทุก browser / iOS Edge) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAQuPDd5FJuGFr3t06MhtOZHn5T2DtH8ZI",
+  authDomain: "factory-fuel.firebaseapp.com",
+  projectId: "factory-fuel",
+  storageBucket: "factory-fuel.firebasestorage.app",
+  messagingSenderId: "984656081903",
+  appId: "1:984656081903:web:3fb1ee771b2f3582357c1a"
+};
+
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Wrapper functions ให้ใช้ชื่อเดิมได้
+function doc(_, ...path) { return db.doc(path.join("/")); }
+function collection(_, col) { return db.collection(col); }
+function getDoc(ref) { return ref.get(); }
+function setDoc(ref, data) { return ref.set(data); }
+function addDoc(ref, data) { return ref.add(data); }
+function onSnapshot(q, ok, err) { return q.onSnapshot(ok, err); }
+function query(col, ...fns) { let q=col; fns.forEach(fn=>q=fn(q)); return q; }
+function orderBy(f, d) { return q => q.orderBy(f, d||'asc'); }
+
+const CAPS = {1:20000, 2:20000, 3:9500};
+let tanks = {1:20000, 2:20000, 3:9500};
+let masterDb = {staff:[],drivers:[],plates:[],inspectors:[],suppliers:[],depots:[]};
+let logs = [];
+
+function setSyncStatus(state){
+  const dot=document.getElementById('syncDot'), txt=document.getElementById('syncText'), btn=document.getElementById('retryBtn');
+  if(state==='ok'){dot.className='sync-dot';txt.textContent='ซิงค์แล้ว';if(btn)btn.style.display='none';}
+  else if(state==='syncing'){dot.className='sync-dot syncing';txt.textContent='กำลังเชื่อมต่อ...';if(btn)btn.style.display='none';}
+  else{dot.className='sync-dot offline';txt.textContent='ออฟไลน์';if(btn)btn.style.display='inline-block';}
+}
+window._retryConnect=async function(){
+  setSyncStatus('syncing');
+  await loadTanks();
+  await loadMasterDb();
+  listenLogs();
+};
+
+async function withRetry(fn,retries,delayMs){
+  retries=retries||3;delayMs=delayMs||2000;
+  for(var i=0;i<retries;i++){
+    try{return await fn();}
+    catch(e){if(i<retries-1){await new Promise(function(r){setTimeout(r,delayMs*(i+1));});}else{throw e;}}
+  }
+}
+
+async function loadTanks(){
+  setSyncStatus('syncing');
+  try{
+    const snap=await withRetry(function(){return getDoc(doc(db,'config','tanks'));});
+    if(snap.exists)tanks=snap.data();
+    else await setDoc(doc(db,'config','tanks'),tanks);
+    renderTanks();renderAdjGrid();setSyncStatus('ok');
+  }catch(e){setSyncStatus('offline');renderTanks();renderAdjGrid();}
+}
+async function saveTanks(){try{await withRetry(function(){return setDoc(doc(db,'config','tanks'),tanks);});}catch(e){}}
+async function loadMasterDb(){
+  try{
+    const snap=await withRetry(function(){return getDoc(doc(db,'config','masterDb'));});
+    if(snap.exists)masterDb=snap.data();
+    else await setDoc(doc(db,'config','masterDb'),masterDb);
+    populateSelects();
+  }catch(e){}
+}
+async function saveMasterDb(){try{await withRetry(function(){return setDoc(doc(db,'config','masterDb'),masterDb);});}catch(e){}}
+
+var _unsubLogs=null;
+function listenLogs(){
+  if(_unsubLogs){try{_unsubLogs();}catch(e){}}
+  const q=query(collection(db,'logs'),orderBy('createdAt','desc'));
+  _unsubLogs=onSnapshot(q,function(snap){
+    logs=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    populatePlateFilter();
+    const at=document.querySelector('.tab.active');
+    if(at&&at.textContent.includes('ประวัติ'))renderLog();
+    setSyncStatus('ok');
+  },function(err){
+    setSyncStatus('offline');
+    setTimeout(function(){setSyncStatus('syncing');listenLogs();},5000);
+  });
+}
+
+function pct(t){return tanks[t]/CAPS[t];}
+function fuelColor(p){
+  if(p>0.5)return{fill:'#1D9E75',track:'#E1F5EE',text:'#085041'};
+  if(p>0.2)return{fill:'#EF9F27',track:'#FAEEDA',text:'#633806'};
+  return{fill:'#E24B4A',track:'#FCEBEB',text:'#791F1F'};
+}
+function drawTank(t,r){
+  const p=pct(t),pPct=Math.round(p*100),vol=tanks[t].toLocaleString(),cap=CAPS[t].toLocaleString();
+  const col=fuelColor(p),cx=r,cy=r,sw=r*0.10,ir=r-sw/2,circ=2*Math.PI*ir,size=r*2;
+  return `<div class="tank-wrap"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block">
+    <circle cx="${cx}" cy="${cy}" r="${ir}" fill="${col.track}"/>
+    <circle cx="${cx}" cy="${cy}" r="${ir}" fill="none" stroke="${col.fill}" stroke-width="${sw}" stroke-dasharray="${circ*p} ${circ*(1-p)}" stroke-dashoffset="${circ*0.25}" stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
+    <circle cx="${cx}" cy="${cy}" r="${ir*0.62}" fill="white" opacity="0.92"/>
+    <text x="${cx}" y="${cy-r*0.10}" text-anchor="middle" font-size="${r*0.28}" font-weight="500" fill="${col.text}" font-family="'Sarabun',sans-serif">${pPct}%</text>
+    <text x="${cx}" y="${cy+r*0.18}" text-anchor="middle" font-size="${r*0.19}" fill="${col.text}" font-family="'Sarabun',sans-serif">${vol} ล.</text>
+    <text x="${cx}" y="${cy+r*0.40}" text-anchor="middle" font-size="${r*0.155}" fill="#888780" font-family="'Sarabun',sans-serif">/ ${cap} ล.</text>
+  </svg><div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);text-align:center">ถัง ${t}</div></div>`;
+}
+function renderTanks(){document.getElementById('tanksVisual').innerHTML=drawTank(1,82)+drawTank(2,82)+drawTank(3,62);}
+
+function renderAdjGrid(){}
+
+const SEL_MAP={
+  staff:{listId:'staffList',icon:'ti-user',selIds:['d_staff']},
+  drivers:{listId:'driverList',icon:'ti-steering-wheel',selIds:['d_driver']},
+  plates:{listId:'plateList',icon:'ti-car',selIds:['d_plate']},
+  inspectors:{listId:'inspectorList',icon:'ti-user-check',selIds:['f_inspector']},
+  suppliers:{listId:'supplierList',icon:'ti-truck',selIds:['f_supplier']},
+  depots:{listId:'depotList',icon:'ti-building-warehouse',selIds:['f_depot']},
+};
+const PH={staff:'-- เลือกเจ้าหน้าที่ --',drivers:'-- เลือกคนขับ --',plates:'-- เลือกทะเบียน --',inspectors:'-- เลือกผู้ตรวจสอบ --',suppliers:'-- เลือกผู้จัดส่ง --',depots:'-- เลือกคลังต้นทาง --'};
+
+function populateSelects(){
+  Object.entries(SEL_MAP).forEach(([key,cfg])=>{
+    cfg.selIds.forEach(sid=>{
+      const el=document.getElementById(sid);if(!el)return;
+      const cur=el.value;
+      el.innerHTML=`<option value="">${PH[key]}</option>`+(masterDb[key]||[]).map(x=>`<option value="${x}">${x}</option>`).join('');
+      if(cur)el.value=cur;
+    });
+  });
+}
+function renderDbList(key){
+  const cfg=SEL_MAP[key],el=document.getElementById(cfg.listId);if(!el)return;
+  el.innerHTML=(masterDb[key]||[]).length
+    ?(masterDb[key]).map((x,i)=>`<div class="db-item"><span><i class="ti ${cfg.icon}" style="font-size:13px;margin-right:5px"></i>${x}</span><button onclick="window._rm('${key}',${i})">×</button></div>`).join('')
+    :'<div style="font-size:12px;color:var(--color-text-secondary);padding:6px 0">ยังไม่มีข้อมูล</div>';
+}
+function renderAllDbLists(){Object.keys(SEL_MAP).forEach(renderDbList);}
+
+window._rm=async(key,i)=>{masterDb[key].splice(i,1);await saveMasterDb();populateSelects();renderDbList(key);};
+window.addItem=async(key,inputId)=>{
+  let v=document.getElementById(inputId).value.trim();
+  if(key==='plates')v=v.toUpperCase();
+  if(!v)return;
+  if(!masterDb[key])masterDb[key]=[];
+  if(masterDb[key].includes(v)){showAlert('มีรายการนี้แล้ว','a-err');return;}
+  masterDb[key].push(v);document.getElementById(inputId).value='';
+  await saveMasterDb();populateSelects();renderDbList(key);showAlert('เพิ่มข้อมูลแล้ว','a-ok');
+};
+
+function populatePlateFilter(){
+  const el=document.getElementById('flt_plate'),cur=el.value;
+  const plates=[...new Set(logs.filter(l=>l.plate).map(l=>l.plate))].sort();
+  el.innerHTML='<option value="">ทุกทะเบียน</option>'+plates.map(p=>`<option value="${p}">${p}</option>`).join('');
+  if(cur&&plates.includes(cur))el.value=cur;
+}
+
+window.calcStats=function(){
+  const ov=parseFloat(document.getElementById('d_mile_old').value);
+  const nv=parseFloat(document.getElementById('d_mile_new').value);
+  const amt=parseFloat(document.getElementById('d_amount').value);
+  const box=document.getElementById('calcBox');
+  const ho=!isNaN(ov)&&document.getElementById('d_mile_old').value!=='';
+  const hn=!isNaN(nv)&&document.getElementById('d_mile_new').value!=='';
+  if(!ho&&!hn){box.style.display='none';return;}
+  box.style.display='grid';
+  if(ho&&hn){
+    const dist=Math.round(nv-ov);
+    document.getElementById('calcDist').textContent=dist.toLocaleString()+' กม.';
+    document.getElementById('calcDistSub').textContent=nv.toLocaleString()+' − '+ov.toLocaleString()+' = '+dist.toLocaleString()+' กม.';
+    if(!isNaN(amt)&&amt>0){document.getElementById('calcEcon').textContent=(dist/amt).toFixed(2)+' กม./ล.';document.getElementById('calcEconSub').textContent=dist.toLocaleString()+' กม. ÷ '+amt.toLocaleString()+' ล.';}
+    else{document.getElementById('calcEcon').textContent='-- กม./ล.';document.getElementById('calcEconSub').textContent='กรอกปริมาณน้ำมันเพื่อคำนวณ';}
+  }else{document.getElementById('calcDist').textContent='-- กม.';document.getElementById('calcEcon').textContent='-- กม./ล.';}
+};
+
+function fmtDT(d){const p=n=>String(n).padStart(2,'0');return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()+543}  ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;}
+function updateClock(){const el=document.getElementById('liveTime');if(el)el.textContent=fmtDT(new Date());}
+setInterval(updateClock,1000);updateClock();
+
+window.switchTab=function(id){
+  const tabs=['drain','fill','log','db'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===id));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  if(id==='log'){populatePlateFilter();renderLog();}
+  if(id==='db')renderAllDbLists();
+  clearAlert();
+};
+
+function showAlert(msg,cls){const b=document.getElementById('alertBox');b.innerHTML=`<div class="alert ${cls}">${msg}</div>`;setTimeout(()=>b.innerHTML='',4000);}
+function clearAlert(){document.getElementById('alertBox').innerHTML='';}
+
+window.clearDrain=function(){
+  ['d_staff','d_driver','d_plate'].forEach(id=>document.getElementById(id).value='');
+  ['d_mile_old','d_mile_new','d_meter','d_amount','d_note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('calcBox').style.display='none';
+};
+window.clearFill=function(){
+  ['f_inspector','f_supplier','f_depot'].forEach(id=>document.getElementById(id).value='');
+  ['f_amount','f_price','f_meter','f_note'].forEach(id=>document.getElementById(id).value='');
+};
+
+window.saveDrain=async function(){
+  const staff=document.getElementById('d_staff').value,driver=document.getElementById('d_driver').value,plate=document.getElementById('d_plate').value;
+  const tank=parseInt(document.getElementById('d_tank').value),mileOld=document.getElementById('d_mile_old').value.trim(),mileNew=document.getElementById('d_mile_new').value.trim();
+  const meter=document.getElementById('d_meter').value.trim(),amount=parseFloat(document.getElementById('d_amount').value),note=document.getElementById('d_note').value.trim();
+  if(!staff||!driver||!plate||!amount){showAlert('กรุณาเลือกข้อมูลให้ครบ','a-err');return;}
+  if(amount>tanks[tank]){showAlert(`น้ำมันในถัง ${tank} ไม่เพียงพอ (เหลือ ${tanks[tank].toLocaleString()} ล.)`,'a-err');return;}
+  setSyncStatus('syncing');
+  const ts=fmtDT(new Date());tanks[tank]=Math.round(tanks[tank]-amount);
+  const hasMiles=mileOld!==''&&mileNew!=='',dist=hasMiles?Math.round(parseFloat(mileNew)-parseFloat(mileOld)):null,econ=(hasMiles&&amount>0&&dist!==null)?(dist/amount):null;
+  try{
+    await addDoc(collection(db,'logs'),{type:'drain',staff,driver,plate,ts,tank,amount,note,mileOld,mileNew,dist,econ,meter,remaining:tanks[tank],createdAt:Date.now()});
+    await saveTanks();renderTanks();setSyncStatus('ok');
+    showAlert(`บันทึกสำเร็จ — จ่าย ${amount.toLocaleString()} ล. จากถัง ${tank} คงเหลือ ${tanks[tank].toLocaleString()} ล.`,'a-ok');
+    window.clearDrain();
+  }catch(e){setSyncStatus('offline');showAlert('เกิดข้อผิดพลาด ตรวจสอบการเชื่อมต่อ','a-err');}
+};
+
+window.saveFill=async function(){
+  const inspector=document.getElementById('f_inspector').value,supplier=document.getElementById('f_supplier').value,depot=document.getElementById('f_depot').value;
+  const date=document.getElementById('f_date').value,time=document.getElementById('f_time').value,tank=parseInt(document.getElementById('f_tank').value);
+  const amount=parseFloat(document.getElementById('f_amount').value),price=parseFloat(document.getElementById('f_price').value)||0;
+  const meter=document.getElementById('f_meter').value.trim(),note=document.getElementById('f_note').value.trim();
+  if(!inspector||!date||!time||!amount){showAlert('กรุณากรอกข้อมูลให้ครบ','a-err');return;}
+  const newVol=tanks[tank]+amount;
+  if(newVol>CAPS[tank]){showAlert(`เกินความจุถัง ${tank}`,'a-err');return;}
+  setSyncStatus('syncing');tanks[tank]=Math.round(newVol);
+  const [y,m,d]=date.split('-'),ts=`${d}/${m}/${parseInt(y)+543}  ${time}`;
+  try{
+    await addDoc(collection(db,'logs'),{type:'fill',inspector,supplier,depot,ts,tank,amount,price,meter,note,remaining:tanks[tank],createdAt:Date.now()});
+    await saveTanks();renderTanks();setSyncStatus('ok');
+    showAlert(`บันทึกสำเร็จ — เติม ${amount.toLocaleString()} ล. เข้าถัง ${tank} รวม ${tanks[tank].toLocaleString()} ล.`,'a-ok');
+    window.clearFill();
+  }catch(e){setSyncStatus('offline');showAlert('เกิดข้อผิดพลาด ตรวจสอบการเชื่อมต่อ','a-err');}
+};
+
+window.renderLog=function(){
+  const typeF=document.getElementById('flt_type').value,tankF=document.getElementById('flt_tank').value,plateF=document.getElementById('flt_plate').value;
+  let items=logs.filter(l=>{
+    if(typeF&&l.type!==typeF)return false;
+    if(tankF){
+      if(l.type==='adjust'){if(!l.changes||!l.changes.some(c=>c.tank==tankF))return false;}
+      else if(l.tank!=tankF)return false;
+    }
+    if(plateF&&l.plate!==plateF)return false;
+    return true;
+  });
+  const el=document.getElementById('logList');
+  if(!items.length){el.innerHTML='<div class="empty"><i class="ti ti-clipboard" style="font-size:28px;display:block;margin-bottom:6px"></i>ไม่มีรายการ</div>';return;}
+  el.innerHTML=items.map(l=>{
+    if(l.type==='adjust'){
+      const rows=(l.changes||[]).map(c=>`<div class="lf"><label>ถัง ${c.tank}</label><span>${c.before.toLocaleString()} → <b>${c.after.toLocaleString()}</b> ล. (${c.diff>=0?'+':''}${c.diff.toLocaleString()})</span></div>`).join('');
+      return `<div class="log-item"><div class="log-hdr"><div style="display:flex;gap:7px;align-items:center"><span class="badge b-adj"><i class="ti ti-adjustments" aria-hidden="true"></i> ปรับสถานะ</span></div><span style="font-size:11px;color:var(--color-text-secondary)">${l.ts}</span></div><div class="log-body"><div class="lf"><label>ผู้ตรวจสอบ</label><span>${l.inspector}</span></div>${rows}${l.note?`<div class="lf"><label>หมายเหตุ</label><span>${l.note}</span></div>`:''}</div></div>`;
+    }
+    const meterBadge=l.meter?`<div class="lf"><label>มิเตอร์ถัง</label><span style="color:#854F0B">${Number(l.meter).toLocaleString()} ล.</span></div>`:'';
+    if(l.type==='drain'){
+      const hasMile=l.mileOld!==''&&l.mileNew!=='';
+      const stats=hasMile?`<div class="log-stats"><div class="ls-card d"><div class="ll">ระยะทาง</div><div class="lv">${l.dist!=null?l.dist.toLocaleString():'--'} กม.</div></div><div class="ls-card e"><div class="ll">อัตราสิ้นเปลือง</div><div class="lv">${l.econ!=null?l.econ.toFixed(2):'--'} กม./ล.</div></div></div>`:'';
+      return `<div class="log-item"><div class="log-hdr"><div style="display:flex;gap:7px;align-items:center"><span class="badge b-drain"><i class="ti ti-gas-station" aria-hidden="true"></i> เติมน้ำมัน</span><span style="font-size:12px;font-weight:500">ถัง ${l.tank}</span></div><span style="font-size:11px;color:var(--color-text-secondary)">${l.ts}</span></div><div class="log-body"><div class="lf"><label>เจ้าหน้าที่</label><span>${l.staff}</span></div><div class="lf"><label>คนขับ</label><span>${l.driver}</span></div><div class="lf"><label>ทะเบียนรถ</label><span>${l.plate}</span></div><div class="lf"><label>ปริมาณ</label><span style="color:#993C1D">-${l.amount.toLocaleString()} ล.</span></div><div class="lf"><label>คงเหลือ</label><span>${l.remaining.toLocaleString()} ล.</span></div>${meterBadge}${hasMile?`<div class="lf"><label>ไมล์เดิม → ใหม่</label><span>${Number(l.mileOld).toLocaleString()} → ${Number(l.mileNew).toLocaleString()} กม.</span></div>`:''}${l.note?`<div class="lf"><label>หมายเหตุ</label><span>${l.note}</span></div>`:''}</div>${stats}</div>`;
+    }else{
+      const tot=l.price&&l.amount?'฿'+(l.price*l.amount).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'';
+      return `<div class="log-item"><div class="log-hdr"><div style="display:flex;gap:7px;align-items:center"><span class="badge b-fill"><i class="ti ti-plus" aria-hidden="true"></i> น้ำมันมาลง</span><span style="font-size:12px;font-weight:500">ถัง ${l.tank}</span></div><span style="font-size:11px;color:var(--color-text-secondary)">${l.ts}</span></div><div class="log-body"><div class="lf"><label>ผู้ตรวจสอบ</label><span>${l.inspector}</span></div><div class="lf"><label>ผู้จัดส่ง</label><span>${l.supplier||'-'}</span></div><div class="lf"><label>คลังต้นทาง</label><span>${l.depot||'-'}</span></div><div class="lf"><label>ปริมาณ</label><span style="color:#0F6E56">+${l.amount.toLocaleString()} ล.</span></div><div class="lf"><label>คงเหลือ</label><span>${l.remaining.toLocaleString()} ล.</span></div>${meterBadge}${tot?`<div class="lf"><label>มูลค่า</label><span>${tot}</span></div>`:''}${l.note?`<div class="lf"><label>หมายเหตุ</label><span>${l.note}</span></div>`:''}</div></div>`;
+    }
+  }).join('');
+};
+
+(async function(){
+  const now=new Date();
+  document.getElementById('f_date').valueAsDate=now;
+  document.getElementById('f_time').value=now.toTimeString().slice(0,5);
+  await loadTanks();
+  await loadMasterDb();
+  listenLogs();
+})();
+</script>
+</body>
+</html>
